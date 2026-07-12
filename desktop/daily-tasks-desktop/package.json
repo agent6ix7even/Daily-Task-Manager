@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "description": "Дневник задач — автономное настольное приложение",
+  "author": "agent6ix7even",
+  "license": "MIT",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev:renderer": "vite",

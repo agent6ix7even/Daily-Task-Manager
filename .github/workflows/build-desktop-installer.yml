@@ -1,0 +1,61 @@
+name: Build Desktop Installer (Windows)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "desktop/daily-tasks-desktop/**"
+      - ".github/workflows/build-desktop-installer.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop/daily-tasks-desktop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies (workspace root)
+        working-directory: .
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build renderer + main process
+        run: pnpm run build
+
+      - name: Build Windows installer (NSIS + portable)
+        run: pnpm exec electron-builder --win --x64
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: desktop/daily-tasks-desktop/release/*.exe
+          if-no-files-found: error
+
+      - name: Create GitHub Release with installer
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: desktop-v${{ github.run_number }}
+          name: Дневник задач (десктоп) v${{ github.run_number }}
+          files: desktop/daily-tasks-desktop/release/*.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

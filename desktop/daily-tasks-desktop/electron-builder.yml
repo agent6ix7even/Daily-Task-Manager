@@ -11,11 +11,15 @@ win:
   target:
     - target: nsis
       arch: [x64]
+    - target: portable
+      arch: [x64]
   signAndEditExecutable: false
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   perMachine: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
 mac:
   target:
     - target: zip
