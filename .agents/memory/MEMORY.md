@@ -1,1 +1,2 @@
 - [Daily tasks app scope](daily-tasks-scope.md) — user wants minimal CRUD only, no extra fields/features unless asked.
+- [Electron builds in this sandbox](electron-builds-in-sandbox.md) — wine/32-bit is broken here; use signAndEditExecutable:false + portable/zip targets, not nsis/dmg.

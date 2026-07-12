@@ -39,6 +39,7 @@ packages:
   - lib/*
   - lib/integrations/*
   - scripts
+  - desktop/*
 
 catalog:
   '@replit/vite-plugin-cartographer': ^0.5.21
@@ -71,6 +72,7 @@ autoInstallPeers: false
 onlyBuiltDependencies:
   - '@swc/core'
   - esbuild
+  - electron
   - msw
   - unrs-resolver
 
