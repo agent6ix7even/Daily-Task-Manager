@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Ежедневные задачи"
+version = "1.0.0"
+id = "artifacts/daily-tasks"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22208
+
+[services.development]
+run = "pnpm --filter @workspace/daily-tasks run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/daily-tasks", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/daily-tasks/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22208"
+BASE_PATH = "/"

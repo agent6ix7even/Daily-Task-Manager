@@ -1,0 +1,1 @@
+- [Daily tasks app scope](daily-tasks-scope.md) — user wants minimal CRUD only, no extra fields/features unless asked.
