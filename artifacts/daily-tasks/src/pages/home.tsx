@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, X, PenLine, Loader2, Check } from 'lucide-react';
+import { Plus, X, PenLine, Loader2, Check, Sun, Moon } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
   useListTasks, 
@@ -9,6 +9,7 @@ import {
   useDeleteTask, 
   getListTasksQueryKey 
 } from '@workspace/api-client-react';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function Home() {
   const queryClient = useQueryClient();
@@ -17,6 +18,8 @@ export default function Home() {
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+
+  const { theme, toggleTheme } = useTheme();
 
   const [newTaskText, setNewTaskText] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -147,54 +150,45 @@ export default function Home() {
                       if (e.key === 'Enter') handleUpdateTask(task.id);
                       if (e.key === 'Escape') setEditingId(null);
                     }}
-                    onBlur={() => handleUpdateTask(task.id)}
-                    className="flex-1 bg-transparent border-b border-foreground/20 focus:border-foreground focus:outline-none py-0.5 text-base"
-                    data-testid={`input-edit-${task.id}`}
+                    className="flex-1 bg-transparent border-b border-foreground/40 focus:border-foreground py-0.5 text-base focus:outline-none transition-colors font-sans"
+                    data-testid={`input-edit-task-${task.id}`}
                   />
-                  <button 
-                    onMouseDown={(e) => {
-                      e.preventDefault(); // Prevent blur
-                      handleUpdateTask(task.id);
-                    }}
-                    className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-                    data-testid={`button-save-${task.id}`}
-                    aria-label="Сохранить"
+                  <button
+                    onClick={() => handleUpdateTask(task.id)}
+                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                    data-testid={`button-save-task-${task.id}`}
                   >
                     <Check className="w-4 h-4" />
                   </button>
+                  <button
+                    onClick={() => setEditingId(null)}
+                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               ) : (
-                <div 
-                  className="text-base text-foreground/90 leading-relaxed break-words cursor-text"
-                  onClick={() => startEditing(task.id, task.text)}
-                  data-testid={`text-task-${task.id}`}
-                >
-                  {task.text}
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-base font-sans leading-relaxed break-words">{task.text}</span>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    <button
+                      onClick={() => startEditing(task.id, task.text)}
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                      data-testid={`button-edit-task-${task.id}`}
+                    >
+                      <PenLine className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTask(task.id)}
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                      data-testid={`button-delete-task-${task.id}`}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
-
-            {editingId !== task.id && (
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
-                <button
-                  onClick={() => startEditing(task.id, task.text)}
-                  className="p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-black/5 dark:hover:bg-white/5"
-                  aria-label="Редактировать"
-                  data-testid={`button-edit-${task.id}`}
-                >
-                  <PenLine className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDeleteTask(task.id)}
-                  disabled={deleteTask.isPending}
-                  className="p-1.5 text-muted-foreground hover:text-destructive transition-colors rounded-md hover:bg-black/5 dark:hover:bg-white/5"
-                  aria-label="Удалить"
-                  data-testid={`button-delete-${task.id}`}
-                >
-                  {deleteTask.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
-                </button>
-              </div>
-            )}
           </li>
         ))}
       </ul>
@@ -206,13 +200,27 @@ export default function Home() {
       <div className="w-full max-w-2xl mt-16 sm:mt-24">
         
         <header className="mb-12">
-          <div className="flex flex-col space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-serif text-foreground tracking-tight">
-              Дневник задач
-            </h1>
-            <p className="text-muted-foreground font-serif italic text-sm sm:text-base">
-              Что нужно сделать сегодня?
-            </p>
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col space-y-2">
+              <h1 className="text-3xl sm:text-4xl font-serif text-foreground tracking-tight">
+                Дневник задач
+              </h1>
+              <p className="text-muted-foreground font-serif italic text-sm sm:text-base">
+                Что нужно сделать сегодня?
+              </p>
+            </div>
+            <button
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Переключить на светлую тему' : 'Переключить на тёмную тему'}
+              className="mt-1 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+              data-testid="button-toggle-theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
+            </button>
           </div>
         </header>
 
