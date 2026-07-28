@@ -8,6 +8,14 @@ interface ToastState {
 
 let toastId = 0;
 
+function getInitialTheme(): "light" | "dark" {
+  const stored = localStorage.getItem("theme");
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
 export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -15,9 +23,19 @@ export default function App() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTaskText, setEditTaskText] = useState("");
   const [toasts, setToasts] = useState<ToastState[]>([]);
+  const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
+
+  // Apply theme class to <html> and persist
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () =>
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
   const showToast = useCallback((message: string) => {
     const id = ++toastId;
@@ -83,8 +101,23 @@ export default function App() {
     <div className="app">
       <div className="app-inner">
         <header>
-          <h1 className="app-title">Дневник задач</h1>
-          <p className="app-subtitle">Что нужно сделать сегодня?</p>
+          <div className="header-row">
+            <div>
+              <h1 className="app-title">Дневник задач</h1>
+              <p className="app-subtitle">Что нужно сделать сегодня?</p>
+            </div>
+            <button
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={
+                theme === "dark"
+                  ? "Переключить на светлую тему"
+                  : "Переключить на тёмную тему"
+              }
+            >
+              {theme === "dark" ? "☀" : "☾"}
+            </button>
+          </div>
         </header>
 
         <main>
