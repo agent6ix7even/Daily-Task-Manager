@@ -15,9 +15,30 @@ export default function App() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTaskText, setEditTaskText] = useState("");
   const [toasts, setToasts] = useState<ToastState[]>([]);
+  
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) {
+        return savedTheme === "dark";
+      }
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+    return false;
+  });
 
   const inputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDark]);
 
   const showToast = useCallback((message: string) => {
     const id = ++toastId;
@@ -82,9 +103,18 @@ export default function App() {
   return (
     <div className="app">
       <div className="app-inner">
-        <header>
-          <h1 className="app-title">Дневник задач</h1>
-          <p className="app-subtitle">Что нужно сделать сегодня?</p>
+        <header className="app-header">
+          <div>
+            <h1 className="app-title">Дневник задач</h1>
+            <p className="app-subtitle">Что нужно сделать сегодня?</p>
+          </div>
+          <button
+            className="icon-button theme-toggle"
+            aria-label="Переключить тему"
+            onClick={() => setIsDark(!isDark)}
+          >
+            {isDark ? "☀️" : "🌙"}
+          </button>
         </header>
 
         <main>
